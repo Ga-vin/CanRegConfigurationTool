@@ -1,22 +1,119 @@
 #include <QtGui>
 #include <QtCore>
 #include <QTextCodec>
+#include <QDebug>
+#include <QtXml/QDomDocument>
+#include <QtXml/QDomElement>
+#include <QtXml/QDomNode>
 
 #include "canregdlg.h"
 
 CanRegDlg::CanRegDlg(QWidget *parent)
-    :QDialog(parent)
+    :QDialog(parent),
+      file_name("")
 {
     QTextCodec::setCodecForTr(QTextCodec::codecForName("utf-8"));
     this->initWidgets();
 
     this->setWindowTitle(QObject::tr("CAN总线寄存器配置工具 --- By Gaivn.Bai"));
     this->resize(1000, 800);
+
+    this->openFile();
+    this->loadFile();
 }
 
 CanRegDlg::~CanRegDlg()
 {
 
+}
+
+bool CanRegDlg::openFile()
+{
+    QString file_name = QFileDialog::getOpenFileName(0,
+                                                     QObject::tr("选择打开的文件"),
+                                                     QObject::tr("请选择一个文件来打开"),
+                                                     QString(QObject::tr("Xml文件(*.xml)")));
+    if ( file_name.isEmpty()) {
+        QMessageBox::warning(0,
+                             QObject::tr("错误提示"),
+                             QObject::tr("选择的文件为空"));
+
+        return (false);
+    } else {
+        this->setFileName(file_name);
+
+        return (true);
+    }
+}
+
+bool CanRegDlg::loadFile()
+{
+    if ( !this->getFileName().isEmpty()) {
+        QFile file(this->getFileName());
+        if ( !file.open(QFile::Text | QFile::ReadOnly)) {
+            QMessageBox::warning(0,
+                                 QObject::tr("错误提示"),
+                                 QObject::tr("无法打开文件:%1 -- %2").arg(this->getFileName()).arg(file.errorString()));
+
+            return (false);
+        }
+
+        if ( !this->parseXml(file)) {
+            QMessageBox::warning(0,
+                                 QObject::tr("错误提示"),
+                                 QObject::tr("无法解析XML文件"));
+
+            return (false);
+        }
+    } else {
+        QMessageBox::warning(0,
+                             QObject::tr("错误提示"),
+                             QObject::tr("文件名为空"));
+
+        return (false);
+    }
+}
+
+bool CanRegDlg::parseXml(const QFile &file)
+{
+    if ( !file.isOpen()) {
+        QMessageBox::warning(0,
+                             QObject::tr("错误提示"),
+                             QObject::tr("文件还没有被打开"));
+
+        return (false);
+    }
+
+    QDomDocument document;
+    int          row;
+    int          col;
+    QString      error;
+    if ( document.setContent(&file, false, &error, &row, &col)) {
+        QMessageBox::warning(0,
+                             QObject::tr("错误提示"),
+                             QObject::tr("解析XML文件错误发生于%1行%2列").arg(row).arg(col));
+
+        return (false);
+    }
+    if ( document.isNull()) {
+        QMessageBox::warning(0,
+                             QObject::tr("错误提示"),
+                             QObject::tr("该XML文件为空"));
+
+        return (false);
+    }
+}
+
+QString CanRegDlg::getFileName() const
+{
+    return (this->file_name);
+}
+
+void CanRegDlg::setFileName(const QString &file_name)
+{
+    if ( this->getFileName() != file_name) {
+        this->file_name = file_name;
+    }
 }
 
 void CanRegDlg::initWidgets()

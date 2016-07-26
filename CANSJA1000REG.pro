@@ -1,3 +1,4 @@
+QT      += xml
 HEADERS += \
     canregdlg.h
 
