@@ -50,7 +50,7 @@ bool CanRegDlg::loadFile()
 {
     if ( !this->getFileName().isEmpty()) {
         QFile file(this->getFileName());
-        if ( !file.open(QFile::Text | QFile::ReadOnly)) {
+        if ( !file.open(QIODevice::Text | QIODevice::ReadOnly)) {
             QMessageBox::warning(0,
                                  QObject::tr("错误提示"),
                                  QObject::tr("无法打开文件:%1 -- %2").arg(this->getFileName()).arg(file.errorString()));
@@ -72,9 +72,11 @@ bool CanRegDlg::loadFile()
 
         return (false);
     }
+
+    return (false);
 }
 
-bool CanRegDlg::parseXml(const QFile &file)
+bool CanRegDlg::parseXml(QFile &file)
 {
     if ( !file.isOpen()) {
         QMessageBox::warning(0,
@@ -88,20 +90,30 @@ bool CanRegDlg::parseXml(const QFile &file)
     int          row;
     int          col;
     QString      error;
-    if ( document.setContent(&file, false, &error, &row, &col)) {
+    if ( !document.setContent(&file, false, &error, &row, &col)) {
         QMessageBox::warning(0,
                              QObject::tr("错误提示"),
                              QObject::tr("解析XML文件错误发生于%1行%2列").arg(row).arg(col));
 
         return (false);
     }
-    if ( document.isNull()) {
-        QMessageBox::warning(0,
-                             QObject::tr("错误提示"),
-                             QObject::tr("该XML文件为空"));
 
+    /*  */
+    QStringList mode_names = this->getCanModeLists(document);
+    if ( mode_names.count() > 0) {
+        for (int i = 0; i != mode_names.count(); ++i) {
+            CanRegNode mode(mode_names.at(i));
+
+            this->can_reg_nodes.append(mode);
+        }
+
+        this->displayCanMode(mode_names);
+        return (true);
+    } else {
         return (false);
     }
+
+    return (false);
 }
 
 QString CanRegDlg::getFileName() const
@@ -114,6 +126,61 @@ void CanRegDlg::setFileName(const QString &file_name)
     if ( this->getFileName() != file_name) {
         this->file_name = file_name;
     }
+}
+
+QStringList CanRegDlg::getCanModeLists(QDomDocument &document)
+{
+    QStringList mode_names;
+
+    if ( document.isNull()) {
+        QMessageBox::warning(0,
+                             QObject::tr("错误提示"),
+                             QObject::tr("该XML文件为空"));
+
+        return (mode_names);
+    }
+
+    QDomElement  root = document.documentElement();
+    QDomNodeList node_list = root.childNodes();
+    for (int i = 0; i != node_list.count(); ++i) {
+        QDomNode item = node_list.at(i);
+        qDebug() << "Tag: " << item.toElement().attribute("mode");
+        mode_names.append(item.toElement().attribute("mode"));
+    }
+
+    return (mode_names);
+}
+
+bool CanRegDlg::addRowItem(QTableWidget *p_object, int row, int col, const QString &contents)
+{
+    if ( row > p_object->rowCount()) {
+        QMessageBox::warning(0,
+                             QObject::tr("错误提示"),
+                             QObject::tr("行数已经超过最大行数"));
+
+        return (false);
+    }
+
+    if ( !contents.isEmpty()) {
+        p_object->setItem(row, col, new QTableWidgetItem(contents));
+
+        return (true);
+    } else {
+        return (false);
+    }
+}
+
+void CanRegDlg::displayCanMode(const QStringList &mode_lists)
+{
+    this->p_tab_can_mode->setRowCount(mode_lists.count());
+    for (int i = 0; i != mode_lists.count(); ++i) {
+        this->addRowItem(this->p_tab_can_mode, i, 0, mode_lists.at(i));
+    }
+}
+
+void CanRegDlg::displayCanRegs(const QStringList &reg_lists)
+{
+
 }
 
 void CanRegDlg::initWidgets()

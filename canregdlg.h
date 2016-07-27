@@ -3,6 +3,9 @@
 
 
 #include <QDialog>
+#include <QList>
+
+#include "canregnode.h"
 
 class QWidget;
 class QTableWidget;
@@ -11,6 +14,8 @@ class QTextEdit;
 class QComboBox;
 class QString;
 class QFile;
+class QStringList;
+class QDomDocument;
 
 class CanRegDlg : public QDialog
 {
@@ -22,10 +27,17 @@ public:
 
     bool openFile();
     bool loadFile();
-    bool parseXml(const QFile &file);
+    bool parseXml(QFile &file);
 
     QString getFileName() const;
     void setFileName(const QString &file_name);
+
+    QStringList getCanModeLists(QDomDocument &document);
+
+    bool addRowItem(QTableWidget *p_object, int row, int col, const QString &contents);
+
+    void displayCanMode(const QStringList &mode_lists);
+    void displayCanRegs(const QStringList &reg_lists);
 
 public slots:
     //
@@ -48,6 +60,8 @@ private:
     QComboBox    *p_com_bit_value;
 
     QString       file_name;
+
+    QList<CanRegNode> can_reg_nodes;
 };
 
 #endif // CANREGDLG_H
