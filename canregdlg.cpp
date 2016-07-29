@@ -17,6 +17,7 @@ CanRegDlg::CanRegDlg(QWidget *parent)
 
     this->setWindowTitle(QObject::tr("CAN总线寄存器配置工具 --- By Gaivn.Bai"));
     this->resize(1000, 800);
+    this->setWindowIcon(QIcon(":/images/main.png"));
 
     this->openFile();
     this->loadFile();
@@ -24,7 +25,19 @@ CanRegDlg::CanRegDlg(QWidget *parent)
 
 CanRegDlg::~CanRegDlg()
 {
+    delete this->p_tab_can_mode;
+    delete this->p_tab_can_regs;
+    delete this->p_tab_can_sub_items;
 
+    delete this->p_txt_can_mode;
+    delete this->p_txt_can_regs;
+    delete this->p_txt_can_sub_items;
+
+    delete this->p_grp_can_mode;
+    delete this->p_grp_can_regs;
+    delete this->p_grp_can_sub_items;
+
+    delete this->p_com_bit_value;
 }
 
 bool CanRegDlg::openFile()
@@ -98,7 +111,7 @@ bool CanRegDlg::parseXml(QFile &file)
         return (false);
     }
 
-    /*  */
+    /* 从XML文件中获取相应每个节点的具体细节 */
     QStringList mode_names = this->getCanModeLists(document);
     if ( mode_names.count() > 0) {
         for (int i = 0; i != mode_names.count(); ++i) {
@@ -151,6 +164,11 @@ QStringList CanRegDlg::getCanModeLists(QDomDocument &document)
     return (mode_names);
 }
 
+CanReg CanRegDlg::getCanRegLists(QDomElement &document)
+{
+    CanReg reg_node;
+}
+
 bool CanRegDlg::addRowItem(QTableWidget *p_object, int row, int col, const QString &contents)
 {
     if ( row > p_object->rowCount()) {
@@ -181,6 +199,30 @@ void CanRegDlg::displayCanMode(const QStringList &mode_lists)
 void CanRegDlg::displayCanRegs(const QStringList &reg_lists)
 {
 
+}
+
+CanRegNode CanRegDlg::getCanRegNodeByMode(const QString &mode_name)
+{
+    CanRegNode reg_node;
+    for (QList<CanRegNode>::const_iterator iter = this->can_reg_nodes.begin(); iter != this->can_reg_nodes.end(); ++iter) {
+        reg_node = *iter;
+        if ( mode_name == reg_node.getCurrentMode()) {
+            return (reg_node);
+        }
+    }
+
+    return (reg_node);
+}
+
+bool CanRegDlg::addCanRegNode(const CanRegNode &node)
+{
+    if ( !node.getCurrentMode().isEmpty()) {
+        this->can_reg_nodes.append(node);
+
+        return (true);
+    } else {
+        return (false);
+    }
 }
 
 void CanRegDlg::initWidgets()

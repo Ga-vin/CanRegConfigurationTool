@@ -50,3 +50,42 @@ void CanRegNode::setRegName(const QString &name)
         this->can_reg.setRegName(name);
     }
 }
+
+CanReg CanRegNode::getRegByName(const QString &reg_name)
+{
+    CanReg can_node;
+    for (QList<CanReg>::const_iterator iter = this->can_reg_lists.begin(); iter != this->can_reg_lists.end(); ++iter) {
+        can_node = *iter;
+        if ( reg_name == can_node.getRegName()) {
+            return (can_node);
+        }
+    }
+
+    return (can_node);
+}
+
+CanReg CanRegNode::getRegByOffset(qint32 offset)
+{
+    CanReg reg_node;
+    if ( offset >= 0) {
+        for (QList<CanReg>::const_iterator iter= this->can_reg_lists.begin(); iter != this->can_reg_lists.end(); ++iter) {
+            reg_node = *iter;
+            if ( offset == reg_node.getRegOffset()) {
+                return (reg_node);
+            }
+        }
+    }
+
+    return (reg_node);
+}
+
+bool CanRegNode::addRegNode(const CanReg reg)
+{
+    if ( !reg.getRegName().isEmpty()) {
+        this->can_reg_lists.append(reg);
+
+        return (true);
+    } else {
+        return (false);
+    }
+}

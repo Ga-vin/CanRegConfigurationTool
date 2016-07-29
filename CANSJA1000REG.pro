@@ -9,3 +9,6 @@ SOURCES += \
     main.cpp \
     canregnode.cpp \
     canreg.cpp
+
+RESOURCES += \
+    cansja1000reg.qrc

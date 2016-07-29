@@ -6,6 +6,7 @@
 #include <QList>
 
 #include "canregnode.h"
+#include "canreg.h"
 
 class QWidget;
 class QTableWidget;
@@ -16,6 +17,7 @@ class QString;
 class QFile;
 class QStringList;
 class QDomDocument;
+class QDomElement;
 
 class CanRegDlg : public QDialog
 {
@@ -33,11 +35,16 @@ public:
     void setFileName(const QString &file_name);
 
     QStringList getCanModeLists(QDomDocument &document);
+    CanReg      getCanRegLists(QDomElement &document);
 
     bool addRowItem(QTableWidget *p_object, int row, int col, const QString &contents);
 
     void displayCanMode(const QStringList &mode_lists);
     void displayCanRegs(const QStringList &reg_lists);
+
+    CanRegNode  getCanRegNodeByMode(const QString &mode_name);
+
+    bool        addCanRegNode(const CanRegNode &node);
 
 public slots:
     //
@@ -45,21 +52,21 @@ public slots:
 private:
     void initWidgets();
 
-    QGroupBox    *p_grp_can_mode;
-    QGroupBox    *p_grp_can_regs;
-    QGroupBox    *p_grp_can_sub_items;
+    QGroupBox        *p_grp_can_mode;
+    QGroupBox        *p_grp_can_regs;
+    QGroupBox        *p_grp_can_sub_items;
 
-    QTableWidget *p_tab_can_mode;
-    QTableWidget *p_tab_can_regs;
-    QTableWidget *p_tab_can_sub_items;
+    QTableWidget     *p_tab_can_mode;
+    QTableWidget     *p_tab_can_regs;
+    QTableWidget     *p_tab_can_sub_items;
 
-    QTextEdit    *p_txt_can_mode;
-    QTextEdit    *p_txt_can_regs;
-    QTextEdit    *p_txt_can_sub_items;
+    QTextEdit        *p_txt_can_mode;
+    QTextEdit        *p_txt_can_regs;
+    QTextEdit        *p_txt_can_sub_items;
 
-    QComboBox    *p_com_bit_value;
+    QComboBox        *p_com_bit_value;
 
-    QString       file_name;
+    QString           file_name;
 
     QList<CanRegNode> can_reg_nodes;
 };

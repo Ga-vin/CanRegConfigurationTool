@@ -2,10 +2,18 @@
 #include "canreg.h"
 
 
+CanReg::CanReg()
+{
+    this->setRegName("None");
+    this->setRegRdWrAttr(RDWR);
+}
+
 CanReg::CanReg(const QString &reg_name, const QString &attr)
 {
     this->setRegName(reg_name);
     this->setRegRdWrAttr(this->convertStrToAttr(attr));
+    this->setRegMode(DEFAULT);
+    this->setRegBit();
 }
 
 CanReg::~CanReg()
@@ -53,5 +61,106 @@ CanReg::RegRDWDAttr CanReg::convertStrToAttr(const QString &attr)
         return (RDWR);
     } else {
         return (RDWR);
+    }
+}
+
+QString CanReg::getRegBit(const REG_BITS bit)
+{
+    switch (bit) {
+    case BIT_0:
+    case BIT_1:
+    case BIT_2:
+    case BIT_3:
+    case BIT_4:
+    case BIT_5:
+    case BIT_6:
+    case BIT_7:
+        return (this->reg_bits.bits[bit]);
+    default:
+        return QString("");
+    }
+}
+
+void CanReg::setRegBit()
+{
+    for (int i = 0; i != MAX_BITS; ++i) {
+        this->reg_bits.bits[i] = QString("");
+    }
+}
+
+void CanReg::setRegBit(const REG_BITS bit, const QString &bit_contents)
+{
+    switch (bit) {
+    case BIT_0:
+    case BIT_1:
+    case BIT_2:
+    case BIT_3:
+    case BIT_4:
+    case BIT_5:
+    case BIT_6:
+    case BIT_7:
+        this->reg_bits.bits[bit] = bit_contents;
+        break;
+    default:
+        return ;
+    }
+}
+
+CanReg::RegMode CanReg::getRegMode() const
+{
+    return (this->reg_mode);
+}
+
+void CanReg::setRegMode(const CanReg::RegMode &mode)
+{
+    switch (mode) {
+    case WORK:
+    case RESET:
+    case DEFAULT:
+        if ( this->reg_mode != mode) {
+            this->reg_mode = mode;
+        }
+        break;
+    default:
+        return ;
+    }
+}
+
+QString CanReg::convertModeToString(const CanReg::RegMode &mode)
+{
+    switch (mode) {
+    case WORK:
+        return (QString("WORK"));
+
+    case RESET:
+        return (QString("RESET"));
+
+    default:
+        return (QString(""));
+    }
+}
+
+CanReg::RegMode CanReg::convertStringToMode(const QString &mode)
+{
+    if ( !mode.isEmpty()) {
+        if ( "WORK" == mode.toUpper()) {
+            return (WORK);
+        } else if ( "RESET" == mode.toUpper()) {
+            return (RESET);
+        }
+    } else {
+        return (DEFAULT);
+    }
+}
+
+qint32 CanReg::getRegOffset() const
+{
+    return (this->reg_offset);
+}
+
+void CanReg::setRegOffset(qint32 offset)
+{
+    if ( (offset >= 0) && (this->getRegOffset() != offset)) {
+        this->reg_offset = offset;
     }
 }
