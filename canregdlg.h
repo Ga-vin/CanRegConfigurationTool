@@ -27,20 +27,20 @@ public:
     CanRegDlg(QWidget *parent = 0);
     ~CanRegDlg();
 
-    bool openFile();
-    bool loadFile();
-    bool parseXml(QFile &file);
+    bool        openFile();
+    bool        loadFile();
+    bool        parseXml(QFile &file);
 
-    QString getFileName() const;
-    void setFileName(const QString &file_name);
+    QString     getFileName() const;
+    void        setFileName(const QString &file_name);
 
     QStringList getCanModeLists(QDomDocument &document);
-    CanReg      getCanRegLists(QDomElement &document);
+    QList<CanReg>      getCanRegLists(QDomDocument &document, const QString &mode_name);
 
-    bool addRowItem(QTableWidget *p_object, int row, int col, const QString &contents);
+    bool        addRowItem(QTableWidget *p_object, int row, int col, const QString &contents);
 
-    void displayCanMode(const QStringList &mode_lists);
-    void displayCanRegs(const QStringList &reg_lists);
+    void        displayCanMode(const QStringList &mode_lists);
+    void        displayCanRegs(const QStringList &reg_lists);
 
     CanRegNode  getCanRegNodeByMode(const QString &mode_name);
 

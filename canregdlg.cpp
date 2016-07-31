@@ -112,10 +112,24 @@ bool CanRegDlg::parseXml(QFile &file)
     }
 
     /* 从XML文件中获取相应每个节点的具体细节 */
+    /* 获取各个模式 */
     QStringList mode_names = this->getCanModeLists(document);
     if ( mode_names.count() > 0) {
         for (int i = 0; i != mode_names.count(); ++i) {
+//            QDomNode   node = mode_names.at(i);
             CanRegNode mode(mode_names.at(i));
+            this->getCanRegLists(document, mode_names.at(i));
+//            if ( node.hasChildNodes()) {
+//                /* 获取二级子节点——各个寄存器的信息 */
+//                QDomNodeList sub_node_list = node.childNodes();
+//                if ( sub_node_list.count() > 0) {
+//                    for (int j = 0; j != sub_node_list.count(); ++j) {
+//                        CanReg reg;
+//                        QDomNode sub_node = sub_node_list.at(j);
+//                        qDebug() << "Sub: name: " << sub_node.toElement().attribute("name");
+//                    }
+//                }
+//            }
 
             this->can_reg_nodes.append(mode);
         }
@@ -164,9 +178,47 @@ QStringList CanRegDlg::getCanModeLists(QDomDocument &document)
     return (mode_names);
 }
 
-CanReg CanRegDlg::getCanRegLists(QDomElement &document)
+QList<CanReg> CanRegDlg::getCanRegLists(QDomDocument &document, const QString &mode_name)
 {
-    CanReg reg_node;
+    // CanReg        reg_node;
+    QList<CanReg> reg_list;
+
+    if ( !document.isNull()) {
+        QDomElement root = document.documentElement();
+        QDomNodeList top_node_list = root.childNodes();
+        if ( top_node_list.count() > 0) {
+            for ( int i = 0; i != top_node_list.count(); ++i) {
+                qDebug() << "Get Reg Lists: " << top_node_list.at(i).toElement().tagName() << " Mode name: " << mode_name;
+                if ( mode_name == top_node_list.at(i).toElement().attribute("mode")) {
+                    if ( top_node_list.at(i).hasChildNodes()) {
+                        QDomNodeList sub_node_list = top_node_list.at(i).childNodes();
+                        if ( sub_node_list.count() > 0) {
+                            for (int j = 0; j != sub_node_list.count(); ++j) {
+                                QDomNode sub_node = sub_node_list.at(j);
+                                qDebug() << sub_node.toElement().attribute("name");
+                                if ( sub_node.hasChildNodes()) {
+                                    qDebug() << "The sub node has child nodes";
+                                    QDomNodeList third_node_list = sub_node.childNodes();
+                                    if ( third_node_list.count() > 0) {
+                                        for (int k = 0; k != third_node_list.count(); ++k) {
+                                            QDomNode third_node = third_node_list.at(k);
+                                            if ( third_node.hasChildNodes()) {
+                                                qDebug() << "[TT] The node has child nodes.";
+                                            } else {
+                                                qDebug() << "[T]: " << third_node.toElement().tagName() << " [T]: " << third_node.toElement().text();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return (reg_list);
 }
 
 bool CanRegDlg::addRowItem(QTableWidget *p_object, int row, int col, const QString &contents)
