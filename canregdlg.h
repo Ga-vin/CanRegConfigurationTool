@@ -18,6 +18,8 @@ class QFile;
 class QStringList;
 class QDomDocument;
 class QDomElement;
+class QDomNode;
+class QDomNodeList;
 
 class CanRegDlg : public QDialog
 {
@@ -43,8 +45,11 @@ public:
     void        displayCanRegs(const QStringList &reg_lists);
 
     CanRegNode  getCanRegNodeByMode(const QString &mode_name);
+    CanReg      getCanReg(const QDomNodeList &node);
 
     bool        addCanRegNode(const CanRegNode &node);
+
+    void        dispalyReg(const CanReg &reg);
 
 public slots:
     //

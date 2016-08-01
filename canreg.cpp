@@ -64,7 +64,7 @@ CanReg::RegRDWDAttr CanReg::convertStrToAttr(const QString &attr)
     }
 }
 
-QString CanReg::getRegBit(const REG_BITS bit)
+QString CanReg::getRegBit(REG_BITS bit) const
 {
     switch (bit) {
     case BIT_0:
@@ -162,5 +162,22 @@ void CanReg::setRegOffset(qint32 offset)
 {
     if ( (offset >= 0) && (this->getRegOffset() != offset)) {
         this->reg_offset = offset;
+    }
+}
+
+CanReg& CanReg::operator =(const CanReg &reg)
+{
+    if ( this != &reg) {
+        this->setRegName(reg.getRegName());
+        this->setRegOffset(reg.getRegOffset());
+        for (int i = 0; i != MAX_BITS; ++i) {
+            this->setRegBit(REG_BITS(i), reg.getRegBit(REG_BITS(i)));
+        }
+        this->setRegMode(reg.getRegMode());
+        this->setRegRdWrAttr(reg.getRegRdWrAttr());
+
+        return (*this);
+    } else {
+        return (*this);
     }
 }

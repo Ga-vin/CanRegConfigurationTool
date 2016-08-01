@@ -43,7 +43,7 @@ public:
     RegRDWDAttr getRegRdWrAttr() const;
     RegRDWDAttr convertStrToAttr(const QString &attr);
 
-    QString     getRegBit(const REG_BITS bit);
+    QString     getRegBit(REG_BITS bit) const;
     void        setRegBit();
     void        setRegBit(const REG_BITS bit, const QString &bit_contents);
 
@@ -54,6 +54,8 @@ public:
 
     qint32      getRegOffset() const;
     void        setRegOffset(qint32 offset);
+
+    CanReg& operator =(const CanReg &reg);
 
 private:
     QString     reg_name;

@@ -185,32 +185,28 @@ QList<CanReg> CanRegDlg::getCanRegLists(QDomDocument &document, const QString &m
 
     if ( !document.isNull()) {
         QDomElement root = document.documentElement();
+        /* 获取各种模式 */
         QDomNodeList top_node_list = root.childNodes();
         if ( top_node_list.count() > 0) {
             for ( int i = 0; i != top_node_list.count(); ++i) {
-                qDebug() << "Get Reg Lists: " << top_node_list.at(i).toElement().tagName() << " Mode name: " << mode_name;
+                //qDebug() << "Get Reg Lists: " << top_node_list.at(i).toElement().tagName() << " Mode name: " << mode_name;
                 if ( mode_name == top_node_list.at(i).toElement().attribute("mode")) {
                     if ( top_node_list.at(i).hasChildNodes()) {
+                        /* 获取特定模式下的各个寄存器 */
                         QDomNodeList sub_node_list = top_node_list.at(i).childNodes();
+                        //qDebug() << "Mode: " << mode_name << "Sub_Node Count: " << sub_node_list.count();
                         if ( sub_node_list.count() > 0) {
+                            CanReg sub_reg;
                             for (int j = 0; j != sub_node_list.count(); ++j) {
-                                QDomNode sub_node = sub_node_list.at(j);
-                                qDebug() << sub_node.toElement().attribute("name");
-                                if ( sub_node.hasChildNodes()) {
-                                    qDebug() << "The sub node has child nodes";
-                                    QDomNodeList third_node_list = sub_node.childNodes();
-                                    if ( third_node_list.count() > 0) {
-                                        for (int k = 0; k != third_node_list.count(); ++k) {
-                                            QDomNode third_node = third_node_list.at(k);
-                                            if ( third_node.hasChildNodes()) {
-                                                qDebug() << "[TT] The node has child nodes.";
-                                            } else {
-                                                qDebug() << "[T]: " << third_node.toElement().tagName() << " [T]: " << third_node.toElement().text();
-                                            }
-                                        }
-                                    }
-                                }
+                                QDomNode sub_node = sub_node_list.at(j);    /* 寄存器节点 */
+                                //qDebug() << sub_node.toElement().attribute("name");
+
+                                /* 获取对应该寄存器下的相应特性 */
+                                sub_reg = this->getCanReg(sub_node.childNodes());
+                                sub_reg.setRegName(sub_node.toElement().attribute("name"));
+                                this->dispalyReg(sub_reg);
                             }
+                            reg_list.append(sub_reg);
                         }
                     }
                 }
@@ -266,6 +262,35 @@ CanRegNode CanRegDlg::getCanRegNodeByMode(const QString &mode_name)
     return (reg_node);
 }
 
+CanReg CanRegDlg::getCanReg(const QDomNodeList &nodes)
+{
+    CanReg reg;
+    bool   ok = false;
+
+    if ( nodes.count() > 0) {
+        for (int i = 0; i != nodes.count(); ++i) {
+            QDomElement element = nodes.at(i).toElement();
+            if ( "OFFSET" == element.tagName()) {
+                reg.setRegOffset(element.text().toInt(&ok, 16));
+                //qDebug() << "Convert: " << element.text().toInt(&ok, 16);
+            } else if ( "PROPERTY" == element.tagName()) {
+                reg.setRegRdWrAttr(reg.convertStrToAttr(element.text()));
+                //qDebug() << "Attr: " << element.text();
+            } else if ( "WORK" == element.tagName()) {
+                /* 解析工作模式下该寄存器各个位的含义 */
+                /* Todo here */
+
+            } else if ( "RESET" == element.tagName()) {
+                /* 解析复位模式下该寄存器各个位的含义 */
+                /* Todo here */
+
+            }
+        }
+    }
+
+    return reg;
+}
+
 bool CanRegDlg::addCanRegNode(const CanRegNode &node)
 {
     if ( !node.getCurrentMode().isEmpty()) {
@@ -275,6 +300,13 @@ bool CanRegDlg::addCanRegNode(const CanRegNode &node)
     } else {
         return (false);
     }
+}
+
+void CanRegDlg::dispalyReg(const CanReg &reg)
+{
+    qDebug() << "Name: " << reg.getRegName();
+    qDebug() << "Offset: " << reg.getRegOffset();
+    qDebug() << "Attr: " << reg.getRegRdWrAttr();
 }
 
 void CanRegDlg::initWidgets()
