@@ -116,21 +116,13 @@ bool CanRegDlg::parseXml(QFile &file)
     QStringList mode_names = this->getCanModeLists(document);
     if ( mode_names.count() > 0) {
         for (int i = 0; i != mode_names.count(); ++i) {
-//            QDomNode   node = mode_names.at(i);
             CanRegNode mode(mode_names.at(i));
-            this->getCanRegLists(document, mode_names.at(i));
-//            if ( node.hasChildNodes()) {
-//                /* 获取二级子节点——各个寄存器的信息 */
-//                QDomNodeList sub_node_list = node.childNodes();
-//                if ( sub_node_list.count() > 0) {
-//                    for (int j = 0; j != sub_node_list.count(); ++j) {
-//                        CanReg reg;
-//                        QDomNode sub_node = sub_node_list.at(j);
-//                        qDebug() << "Sub: name: " << sub_node.toElement().attribute("name");
-//                    }
-//                }
-//            }
-
+            QList<CanReg> lists = this->getCanRegLists(document, mode_names.at(i));
+            if ( lists.count() > 0) {
+                for (int j = 0; j != lists.count(); ++j) {
+                    mode.addRegNode(lists.at(j));
+                }
+            }
             this->can_reg_nodes.append(mode);
         }
 
@@ -180,7 +172,6 @@ QStringList CanRegDlg::getCanModeLists(QDomDocument &document)
 
 QList<CanReg> CanRegDlg::getCanRegLists(QDomDocument &document, const QString &mode_name)
 {
-    // CanReg        reg_node;
     QList<CanReg> reg_list;
 
     if ( !document.isNull()) {
